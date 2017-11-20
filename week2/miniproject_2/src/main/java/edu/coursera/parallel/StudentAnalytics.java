@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -46,7 +47,16 @@ public final class StudentAnalytics {
      */
     public double averageAgeOfEnrolledStudentsParallelStream(
             final Student[] studentArray) {
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
+        double retVal = Stream.of(studentArray)
+                .parallel()
+                .filter(s -> s.checkIsCurrent())
+                .mapToDouble(s -> s.getAge())
+                .average()
+                .getAsDouble();
+
+        return retVal;
+
     }
 
     /**
@@ -100,7 +110,18 @@ public final class StudentAnalytics {
      */
     public String mostCommonFirstNameOfInactiveStudentsParallelStream(
             final Student[] studentArray) {
-        throw new UnsupportedOperationException();
+
+        String name = Stream.of(studentArray)
+                .parallel()
+                .filter(s -> s.checkIsCurrent() == false)
+                // summarize first names
+                .collect(Collectors.groupingBy(Student::getFirstName, Collectors.counting()))
+                // fetch the max entry
+                .entrySet().stream().max(Map.Entry.comparingByValue())
+                // map to first name, needs more reading
+                .map(Map.Entry::getKey).orElse(null);
+
+        return name;
     }
 
     /**
